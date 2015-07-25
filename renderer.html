@@ -5,35 +5,22 @@
 <script src='template.js'></script>
 <script src='smooth_random.js'></script>
 <script>
-
-function renderRound(g,arr){
-  g.beginPath();
-  g.lineWidth=0.15;
-  g.lineCap='round'
-  g.lineJoin='round'
-  Moji.toLines(arr,4).forEach(function(line){
-    g.moveTo(line[0].x,line[0].y);
-    for(var i=1;i<line.length;i++)g.lineTo(line[i].x,line[i].y);
-  })
-  g.stroke();
-}
 var renderers = {
   round: function(g,arr){
     g.beginPath();
     g.lineWidth=0.15;
     g.lineCap='round'
     g.lineJoin='round'
-    Moji.toLines(arr,4).forEach(function(line){
+    Moji.toLines(arr).forEach(function(line){
       g.moveTo(line[0].x,line[0].y);
       for(var i=1;i<line.length;i++)g.lineTo(line[i].x,line[i].y);
     })
     g.stroke();
   },
   pen: function(g,arr){
-    Moji.toDoubledLines(arr,10).forEach(function(line){
+    Moji.toDoubledLines(arr,6).forEach(function(line){
       var weight=new SmoothRandom();
       var prev=null;
-      g.beginPath();
       line.forEach(function(p){
         var l=0;
         if(prev){
@@ -42,10 +29,10 @@ var renderers = {
         }
         prev=p;
         var r=0.05*Math.exp(0.2*weight.next(l*8))
-        g.moveTo(p.x,p.y);
+        g.beginPath();
         g.arc(p.x,p.y,r,0,2*Math.PI);
+        g.fill();
       })
-      g.fill();
     })
   },
   lines: function(g,arr){
@@ -115,6 +102,7 @@ $(function(){
   $('select').on('change',renderAll);
   window.onresize=renderAll;
   renderAll();
+  $('canvas').click(renderAll);
   function renderAll(){
     var $canvas = $('canvas');
     var render = renderers[$('select').val()]
