@@ -44,9 +44,9 @@ var renderers = {
       var prev=null;
       g.beginPath();
       g.lineWidth=0.01;
-      g.lineCap='round'
-      g.lineJoin='round'
-      g.globalAlpha=0.5
+      g.lineCap='round';
+      g.lineJoin='round';
+      g.globalAlpha=0.5;
       g.moveTo(line[0].x,line[0].y);
       for(var i=0;i<line.length;i++){
         var p=line[i];
@@ -103,31 +103,46 @@ $(function(){
   window.onresize=renderAll;
   renderAll();
   $('canvas').click(renderAll);
+  function splitCharPos(text){
+    var line=[],ix=0;
+    var lines=[line]
+    for(var i=0;i<text.length;i++){
+      var c=text[i];
+      if(c=='\n'){ix=0;lines.push(line=[]);continue;}
+      var w=(c.charCodeAt(0)<128?0.5:1);
+      var template = HIRAGANA_TEMPLATES[c]||HIRAGANA_TEMPLATES[HIRAGANA_ALIAS[c]];
+      if(template){
+        if(ix+w>10){ix=0;lines.push(line=[])};
+      }else{
+        if(ix+w>10){console.log(c)};
+      }
+      if(template)line.push({x:ix,y:lines.length-1,w:w,template:template});
+      ix+=w;
+    }
+    return lines;
+  }
+
   function renderAll(){
     var $canvas = $('canvas');
     var render = renderers[$('select').val()]
-    var width=$canvas.width(),height=$canvas.height();
-    $canvas.attr({width:width,height:height});
     var text = $('textarea').val();
+    var charspos=splitCharPos(text);
+    var width=$canvas.width();
+    var height=width/11*(charspos.length||1);
+    $canvas.attr({width:width,height:height});
     var g=$canvas[0].getContext('2d');
-    var ix=0,iy=0;
-    for(var i=0;i<text.length;i++){
-      var c=text[i];
-      if(c=='\n'){ix=0;iy++;continue;}
-      var w=(c.charCodeAt(0)<128?0.5:1);
-      if(ix+w>10){ix=0;iy++;}
-      var template = HIRAGANA_TEMPLATES[c]||HIRAGANA_TEMPLATES[HIRAGANA_ALIAS[c]];
-      if(template){
+    charspos.forEach(function(lines){
+      lines.forEach(function(o){
         g.save();
-        g.translate(width*(0.5+ix+w/2-0.5)/11,width*iy/11+width*Math.sin(i*i)*0.005);
+        g.translate(width*(0.5+o.x+o.w/2-0.5)/11,width*o.y/11+width*Math.sin(o.x+o.y*o.y)*0.005);
         g.scale(width/11,width/11);
-        render(g,new Moji(template).random())
+        render(g,new Moji(o.template).random())
         g.restore();
-      }
-      ix+=w;
-    }
+      });
+    });
     g.save();
-    g.translate(width*0.95,(iy+0.4)*width/11);
+    iy=(charspos.length||1)-1;
+    g.translate(width*0.945,(iy+0.4)*width/11);
     g.scale(width*0.05,width*0.05);
     renderLogo(g,$('input').val());
     g.restore();
@@ -164,8 +179,10 @@ $(function(){
 
 </script>
 <style>
-
+body{margin:0;}
+div{margin: 5px;}
 </style>
+<div>
 mode(筆推奨):<select>
   <option value=round>シンプル</option>
   <option value=pen selected>ペン</option>
@@ -181,5 +198,6 @@ logo:<input value='ぺ'>
  みつをだもの
        \(^o^)/ぺんし</textarea>
 <br>
-<canvas style='width:100%;height:100%;'></canvas>
+</div>
+<canvas style='width:100%;'></canvas>
 
