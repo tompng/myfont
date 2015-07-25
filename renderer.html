@@ -1,4 +1,5 @@
 <meta charset='utf-8'>
+<title>手書きぺんの筆跡</title>
 <script src='../jquery.min.js'></script>
 <script src='moji.js'></script>
 <script src='template.js'></script>
@@ -40,8 +41,7 @@ var renderers = {
           l=Math.sqrt(dx*dx+dy*dy);
         }
         prev=p;
-        var r=weight.next(l*8);
-        r=0.05*Math.exp(0.2*r)
+        var r=0.05*Math.exp(0.2*weight.next(l*8))
         g.moveTo(p.x,p.y);
         g.arc(p.x,p.y,r,0,2*Math.PI);
       })
@@ -59,6 +59,7 @@ var renderers = {
       g.lineWidth=0.01;
       g.lineCap='round'
       g.lineJoin='round'
+      g.globalAlpha=0.5
       g.moveTo(line[0].x,line[0].y);
       for(var i=0;i<line.length;i++){
         var p=line[i];
@@ -78,11 +79,37 @@ var renderers = {
       g.stroke();
     })
     }
-  }
-
+  },
+  brush: function(g,arr){
+    Moji.toDoubledLines(arr,10).forEach(function(line){
+      var weight=new SmoothRandom();
+      var params=[];for(var i=0;i<4;i++)params[i]=new SmoothRandom();
+      var prev=null;
+      line.forEach(function(p){
+        var l=0;
+        if(prev){
+          var dx=p.x-prev.x,dy=p.y-prev.y;
+          l=Math.sqrt(dx*dx+dy*dy);
+        }
+        prev=p;
+        r=0.14*Math.exp(0.2*weight.next(l*8))
+        for(var i=0;i<4;i++){
+          var alpha=0.05*Math.exp(0.2*params[i].next(l*8))
+          g.globalAlpha=alpha/Math.max(l,0.01)/100;
+          g.drawImage(renderers.brush.brushes[i],p.x-r/2,p.y-r/2,r,r);
+        }
+      })
+    })
+  },
 }
 
 $(function(){
+  renderers.brush.brushes=[];
+  for(var i=0;i<4;i++){
+    var img=new Image()
+    img.src='brush/'+i+'.png';
+    renderers.brush.brushes[i]=img;
+  }
   $('textarea').on('input',renderAll)
   $('textarea').on('change',renderAll)
   $('select').on('change',renderAll);
@@ -122,6 +149,7 @@ $(function(){
   <option value=round>シンプル</option>
   <option value=pen selected>ペン</option>
   <option value=lines>線</option>
+  <option value=brush>筆(重いです 文字を決めてから選んでね)</option>
 </select>
 <textarea style='width:100%;height:160px;font-size:20px;'>
 ごみばこ
