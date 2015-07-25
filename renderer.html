@@ -69,9 +69,14 @@ var renderers = {
   },
   brush: function(g,arr){
     Moji.toDoubledLines(arr,10).forEach(function(line){
+      var linelength=0;for(var i=1;i<line.length;i++){
+        var dx=line[i].x-line[i-1].x,dy=line[i].y-line[i-1].y;
+        linelength+=Math.sqrt(dx*dx+dy*dy);
+      }
       var weight=new SmoothRandom();
       var params=[];for(var i=0;i<4;i++)params[i]=new SmoothRandom();
       var prev=null;
+      var randalpha = 0.6+0.8*Math.random();
       line.forEach(function(p){
         var l=0;
         if(prev){
@@ -81,8 +86,8 @@ var renderers = {
         prev=p;
         r=0.14*Math.exp(0.2*weight.next(l*8))
         for(var i=0;i<4;i++){
-          var alpha=Math.exp(0.4*params[i].next(l*8))
-          g.globalAlpha=0.05*alpha/Math.max(100*l,1);
+          var alpha=Math.exp(0.5*params[i].next(l*8))
+          g.globalAlpha=0.08*randalpha*alpha/Math.max(100*l,1)*linelength;
           g.drawImage(renderers.brush.brushes[i],p.x-r/2,p.y-r/2,r,r);
         }
       })
