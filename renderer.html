@@ -1,0 +1,134 @@
+<meta charset='utf-8'>
+<script src='../jquery.min.js'></script>
+<script src='moji.js'></script>
+<script src='template.js'></script>
+<script src='smooth_random.js'></script>
+<script>
+
+function renderRound(g,arr){
+  g.beginPath();
+  g.lineWidth=0.15;
+  g.lineCap='round'
+  g.lineJoin='round'
+  Moji.toLines(arr,4).forEach(function(line){
+    g.moveTo(line[0].x,line[0].y);
+    for(var i=1;i<line.length;i++)g.lineTo(line[i].x,line[i].y);
+  })
+  g.stroke();
+}
+var renderers = {
+  round: function(g,arr){
+    g.beginPath();
+    g.lineWidth=0.15;
+    g.lineCap='round'
+    g.lineJoin='round'
+    Moji.toLines(arr,4).forEach(function(line){
+      g.moveTo(line[0].x,line[0].y);
+      for(var i=1;i<line.length;i++)g.lineTo(line[i].x,line[i].y);
+    })
+    g.stroke();
+  },
+  pen: function(g,arr){
+    Moji.toDoubledLines(arr,10).forEach(function(line){
+      var weight=new SmoothRandom();
+      var prev=null;
+      g.beginPath();
+      line.forEach(function(p){
+        var l=0;
+        if(prev){
+          var dx=p.x-prev.x,dy=p.y-prev.y;
+          l=Math.sqrt(dx*dx+dy*dy);
+        }
+        prev=p;
+        var r=weight.next(l*8);
+        r=0.05*Math.exp(0.2*r)
+        g.moveTo(p.x,p.y);
+        g.arc(p.x,p.y,r,0,2*Math.PI);
+      })
+      g.fill();
+    })
+  },
+  lines: function(g,arr){
+    for(var k=0;k<20;k++){
+    Moji.toDoubledLines(arr,4).forEach(function(line){
+      var xpos=new SmoothRandom();
+      var ypos=new SmoothRandom();
+      var weight=new SmoothRandom();
+      var prev=null;
+      g.beginPath();
+      g.lineWidth=0.01;
+      g.lineCap='round'
+      g.lineJoin='round'
+      g.moveTo(line[0].x,line[0].y);
+      for(var i=0;i<line.length;i++){
+        var p=line[i];
+        var l=0;
+        if(prev){
+          var dx=p.x-prev.x,dy=p.y-prev.y;
+          l=Math.sqrt(dx*dx+dy*dy);
+        }
+        prev=p;
+        var r=weight.next(l*4);
+        var x=0.015*xpos.next(l*8);
+        var y=0.015*ypos.next(l*8);
+        r=0.005*Math.exp(0.2*r)
+        if(i==0)g.moveTo(p.x+x,p.y+y);
+        else g.lineTo(p.x+x,p.y+y);
+      }
+      g.stroke();
+    })
+    }
+  }
+
+}
+
+$(function(){
+  $('textarea').on('input',renderAll)
+  $('textarea').on('change',renderAll)
+  $('select').on('change',renderAll);
+  window.onresize=renderAll;
+  renderAll();
+  function renderAll(){
+    var $canvas = $('canvas');
+    var render = renderers[$('select').val()]
+    var width=$canvas.width(),height=$canvas.height();
+    $canvas.attr({width:width,height:height});
+    var text = $('textarea').val();
+    var g=$canvas[0].getContext('2d');
+    var ix=0,iy=0;
+    for(var i=0;i<text.length;i++){
+      var c=text[i];
+      if(c=='\n'){ix=0;iy++;continue;}
+      var w=(c.charCodeAt(0)<128?0.5:1);
+      if(ix+w>10){ix=0;iy++;}
+      var template = HIRAGANA_TEMPLATES[c]||HIRAGANA_TEMPLATES[HIRAGANA_ALIAS[c]];
+      if(template){
+        g.save();
+        g.translate(width*(0.5+ix+w/2-0.5)/11,width*iy/11+width*Math.sin(i*i)*0.005);
+        g.scale(width*0.1,width*0.1);
+        render(g,new Moji(template).random())
+        g.restore();
+      }
+      ix+=w;
+    }
+  }
+})
+
+</script>
+<style>
+
+</style>
+<select>
+  <option value=round>シンプル</option>
+  <option value=pen selected>ペン</option>
+  <option value=lines>線</option>
+</select>
+<textarea style='width:100%;height:160px;font-size:20px;'>
+ごみばこ
+  けとばしたって
+いいじゃないか！
+  みつをだもの
+       \(^o^)/ぺんし
+</textarea><br>
+<canvas style='width:100%;height:100%;'></canvas>
+

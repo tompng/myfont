@@ -1,0 +1,133 @@
+<meta charset='utf-8'>
+<script src='../jquery.min.js'></script>
+<script src='moji.js'></script>
+<script src='template.js'></script>
+<script>
+var lines = [];
+var PIECES;
+var CH;
+var dragging=false;
+var N=20
+var moji;
+$(function(){
+  var arr;
+  tmplines=[];
+  function add(e){
+    var offset=$canvas.position();
+    arr.push({
+      x: (e.pageX-offset.left)/$canvas.width(),
+      y: (e.pageY-offset.top)/$canvas.height()
+    })
+  }
+  $('canvas').on('mousedown', function(e){
+    dragging=true;
+    arr=[];
+    tmplines.push(arr);
+    add(e);
+  });
+  $(document).on('mousemove', function(e){
+    if(!arr)return;
+    add(e);
+    canvasclear()
+    tmplines.forEach(function(t){render(t)});
+  });
+  $(document).on('mouseup', function(){
+    if(!arr)return;
+    arr=null;
+    if(tmplines.length==PIECES){
+      line=[];
+      for(var i=0;i<tmplines.length;i++){
+        if(i)line.push(null);
+        line=line.concat(compact(tmplines[i],N));
+      }
+      lines.push(line);
+      moji=new Moji(lines);
+      localStorage['char_'+CH]=JSON.stringify(lines);
+      tmplines=[];
+      dragging=false;
+    }
+  });
+  $canvas = $('canvas');
+  g = $canvas[0].getContext('2d');
+  setInterval(function(){
+    if(dragging)return;
+    if(moji){
+      moji.update();
+      canvasclear();
+      render(moji.line());
+    }
+  },100)
+})
+
+function compact(arr,N){
+  function at(x){
+    x*=arr.length-1;
+    var i=Math.floor(x);x-=i;
+    if(i==arr.length-1)return {x:arr[i].x,y:arr[i].y};
+    return {
+      x:arr[i].x*(1-x)+x*arr[i+1].x,
+      y:arr[i].y*(1-x)+x*arr[i+1].y
+    }
+  }
+  var out=[];
+  for(var i=0;i<N;i++){
+    out.push(at(i/(N-1)));
+  }
+  return out;
+}
+var g, width=512, height=512;
+function canvasclear(){
+  g.clearRect(0,0,width,height);
+}
+
+function render(arr){
+  g.beginPath();
+  g.lineWidth=8;
+  g.lineCap='round'
+  g.lineJoin='round'
+  var moved=false;
+  for(var i=0;i<arr.length;i++){
+    if(!arr[i])moved=false;
+    else if(!moved){
+      g.moveTo(arr[i].x*width,arr[i].y*height);
+      moved=true;
+    }
+    else g.lineTo(arr[i].x*width,arr[i].y*height);
+  }
+  g.stroke();
+}
+
+function load(ch){
+  var p=HIRAGANAS[ch];
+  if(!p)return;
+  PIECES = p;
+  CH=ch;
+  lines=[];
+  try{lines = JSON.parse(localStorage['char_'+CH])||[]}catch(e){}
+  $('#char').text(CH)
+  $('#char_length').text(lines.length);
+  moji=new Moji(lines);
+}
+
+$(function(){
+  $('input').on('input', function(){
+    load($(this).val());
+  })
+})
+
+function exportData(){
+  s="";
+  for(var i in HIRAGANAS){
+    s+="'"+(i=="'"||i=="\\"?'\\':'')+i+"':"+localStorage['char_'+i]+',\n';
+  }
+  $('<textarea>').val('var HIRAGANA_TEMPLATES={\n'+s+'}').appendTo('body');
+}
+
+</script>
+<style>
+
+</style>
+<input type='text'><span id='#char'></span><span id='char_length'></span><button onclick='lines=[];moji=null;'>reset</button><br>
+
+<canvas style='width:80vmin;height:80vmin;background:silver' width=512 height=512></canvas>
+<button onclick='exportData()'>export</button>
