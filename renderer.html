@@ -134,14 +134,15 @@ $(function(){
     var text = $('textarea').val();
     var charspos=splitCharPos(text);
     var width=$canvas.width();
-    var height=width/11*(0.2+(charspos.length||1));
+    var height=width/11*(0.4+(charspos.length||1));
     $canvas.attr({width:width,height:height});
     var g=$canvas[0].getContext('2d');
     charspos.forEach(function(lines){
       lines.forEach(function(o){
         g.save();
-        g.translate(width*(0.3+o.x+o.w/2-0.5)/11,width*(0.1+o.y)/11+width*Math.sin(o.x+o.y*o.y)*0.005);
+        g.translate(width*(0.3+o.x+o.w/2-0.5)/11,width*(0.2+o.y)/11+width*Math.sin(o.x+o.y*o.y)*0.005);
         g.scale(width/11,width/11);
+        g.translate(-0.1,-0.1);g.scale(1.2,1.2);
         render(g,new Moji(o.template).random())
         g.restore();
       });
@@ -213,4 +214,3 @@ logo:<input value='ぺ'>
 <br>
 </div>
 <canvas style='width:100%;'></canvas>
-
