@@ -123,18 +123,19 @@ $(function(){
   }
 
   function renderAll(){
+    $('span').empty();
     var $canvas = $('canvas');
     var render = renderers[$('select').val()]
     var text = $('textarea').val();
     var charspos=splitCharPos(text);
     var width=$canvas.width();
-    var height=width/11*(charspos.length||1);
+    var height=width/11*(0.2+(charspos.length||1));
     $canvas.attr({width:width,height:height});
     var g=$canvas[0].getContext('2d');
     charspos.forEach(function(lines){
       lines.forEach(function(o){
         g.save();
-        g.translate(width*(0.5+o.x+o.w/2-0.5)/11,width*o.y/11+width*Math.sin(o.x+o.y*o.y)*0.005);
+        g.translate(width*(0.3+o.x+o.w/2-0.5)/11,width*(0.1+o.y)/11+width*Math.sin(o.x+o.y*o.y)*0.005);
         g.scale(width/11,width/11);
         render(g,new Moji(o.template).random())
         g.restore();
@@ -142,10 +143,14 @@ $(function(){
     });
     g.save();
     iy=(charspos.length||1)-1;
-    g.translate(width*0.945,(iy+0.4)*width/11);
+    g.translate(width*0.94,(iy+0.4)*width/11);
     g.scale(width*0.05,width*0.05);
     renderLogo(g,$('input').val());
     g.restore();
+    createLink();
+  }
+  function createLink(){
+    $("<a download='tegaki.png'>download</a>").attr('href',$('canvas').get(0).toDataURL()).appendTo('span');
   }
   function renderLogo(g,c){
     if(!c)return;
@@ -181,6 +186,7 @@ $(function(){
 <style>
 body{margin:0;}
 div{margin: 5px;}
+span{float:right;}
 </style>
 <div>
 mode(筆推奨):<select>
@@ -191,6 +197,7 @@ mode(筆推奨):<select>
 </select>
 &nbsp;&nbsp;&nbsp;
 logo:<input value='ぺ'>
+<span></span>
 <textarea style='width:100%;height:160px;font-size:20px;'>
 ごみばこ
  けとばしたって
