@@ -178,6 +178,7 @@ $(function(){
     }
     g.fill();
     g.fillStyle='white'
+    g.globalCompositeOperation = "destination-out";
     renderers.pen(g, new Moji(template).random());
   }
 })
