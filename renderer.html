@@ -81,8 +81,8 @@ var renderers = {
         prev=p;
         r=0.14*Math.exp(0.2*weight.next(l*8))
         for(var i=0;i<4;i++){
-          var alpha=0.05*Math.exp(0.2*params[i].next(l*8))
-          g.globalAlpha=alpha/Math.max(l,0.01)/100;
+          var alpha=Math.exp(0.4*params[i].next(l*8))
+          g.globalAlpha=0.05*alpha/Math.max(100*l,1);
           g.drawImage(renderers.brush.brushes[i],p.x-r/2,p.y-r/2,r,r);
         }
       })
