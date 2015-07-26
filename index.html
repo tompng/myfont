@@ -1,6 +1,6 @@
 <meta charset='utf-8'>
 <title>手書きぺんの筆跡</title>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src='moji.js'></script>
 <script src='template.js'></script>
 <script src='smooth_random.js'></script>
@@ -134,23 +134,32 @@ $(function(){
     var text = $('textarea').val();
     var charspos=splitCharPos(text);
     var width=$canvas.width();
-    var height=width/11*(0.4+(charspos.length||1));
+    var fontSize=width/11;
+    var lineHeight=fontSize*1.4;
+    var marginY=fontSize*0.2;
+    var marginX=0.3*fontSize;
+    var lineNum=charspos.length||1;
+    var height=marginY*2+lineHeight*lineNum;
     $canvas.attr({width:width,height:height});
     var g=$canvas[0].getContext('2d');
     charspos.forEach(function(lines){
       lines.forEach(function(o){
         g.save();
-        g.translate(width*(0.3+o.x+o.w/2-0.5)/11,width*(0.2+o.y)/11+width*Math.sin(o.x+o.y*o.y)*0.005);
-        g.scale(width/11,width/11);
+        g.translate(
+          marginX+(o.x+o.w/2-0.5)*fontSize,
+          marginY+(o.y+0.5)*lineHeight-fontSize/2+Math.sin(o.x+o.y*o.y)*(lineHeight-fontSize)*0.2
+        )
+        g.scale(fontSize,fontSize);
         g.translate(-0.1,-0.1);g.scale(1.2,1.2);
         render(g,new Moji(o.template).random())
         g.restore();
       });
     });
     g.save();
-    iy=(charspos.length||1)-1;
-    g.translate(width*0.94,(iy+0.4)*width/11);
-    g.scale(width*0.05,width*0.05);
+    g.translate(
+      width-fontSize*0.6,
+      marginY+(lineNum-0.5)*lineHeight-fontSize*0.1);
+    g.scale(fontSize*0.5, fontSize*0.5);
     renderLogo(g,$('input').val());
     g.restore();
     createLink();
