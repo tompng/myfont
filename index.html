@@ -103,11 +103,10 @@ $(function(){
     renderers.brush.brushes[i]=img;
   }
   $('textarea, input').on('input',renderAll)
-  $('textarea, input').on('change',renderAll)
-  $('select').on('change',renderAll);
+  $('textarea, input, select').on('change',renderAll)
   window.onresize=renderAll;
   renderAll();
-  $('canvas').click(renderAll);
+  $(document).on('click', 'canvas, img', renderAll);
   function splitCharPos(text){
     var line=[],ix=0;
     var lines=[line]
@@ -128,13 +127,12 @@ $(function(){
   }
 
   function renderAll(){
-    $('span').empty();
-    var $canvas = $('canvas');
+    var $canvas = $('<canvas>');
     var render = renderers[$('select').val()]
     var text = $('textarea').val();
     var transparent = $('input[type=checkbox]').is(':checked');
     var charspos=splitCharPos(text);
-    var width=$canvas.width();
+    var width=$('body').width();
     var fontSize=width/11;
     var lineHeight=fontSize*1.4;
     var marginY=fontSize*0.2;
@@ -169,10 +167,18 @@ $(function(){
     g.scale(fontSize*0.5, fontSize*0.5);
     renderLogo(g,$('input').val(),transparent);
     g.restore();
-    createLink();
+    createLink($canvas);
   }
-  function createLink(){
-    $("<a download='tegaki.png'>download</a>").attr('href',$('canvas').get(0).toDataURL()).appendTo('span');
+  function createLink($canvas){
+    $('span').empty();
+    $('img, canvas').remove();
+    try{
+      var url=$canvas.get(0).toDataURL();
+      $("<a download='tegaki.png'>download</a>").attr('href',url).appendTo('span');
+      $('<img>').attr('src',url).appendTo('body');
+    }catch(e){
+      $canvas.appendTo('body');
+    }
   }
   function renderLogo(g,c,transparent){
     if(!c)return;
@@ -214,6 +220,7 @@ $(function(){
 body{margin:0;}
 div{margin: 5px;}
 span{float:right;}
+img,canvas{background:url(tile.png);width:100%;}
 </style>
 <div>
 mode(筆推奨):<select>
@@ -232,6 +239,4 @@ logo:<input value='ぺ'>
 いいじゃないか！
  みつをだもの
        \(^o^)/ぺんし</textarea>
-<br>
 </div>
-<canvas style='width:100%;background:url(tile.png)'></canvas>
