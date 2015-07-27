@@ -132,6 +132,7 @@ $(function(){
     var $canvas = $('canvas');
     var render = renderers[$('select').val()]
     var text = $('textarea').val();
+    var transparent = $('input[type=checkbox]').is(':checked');
     var charspos=splitCharPos(text);
     var width=$canvas.width();
     var fontSize=width/11;
@@ -142,6 +143,12 @@ $(function(){
     var height=marginY*2+lineHeight*lineNum;
     $canvas.attr({width:width,height:height});
     var g=$canvas[0].getContext('2d');
+    g.clearRect(0,0,width,height);
+    if(!transparent){
+      g.fillStyle='white';
+      g.fillRect(0,0,width,height);
+    }
+    g.fillStyle='black';
     charspos.forEach(function(lines){
       lines.forEach(function(o){
         g.save();
@@ -160,14 +167,14 @@ $(function(){
       width-fontSize*0.6,
       marginY+(lineNum-0.5)*lineHeight-fontSize*0.1);
     g.scale(fontSize*0.5, fontSize*0.5);
-    renderLogo(g,$('input').val());
+    renderLogo(g,$('input').val(),transparent);
     g.restore();
     createLink();
   }
   function createLink(){
     $("<a download='tegaki.png'>download</a>").attr('href',$('canvas').get(0).toDataURL()).appendTo('span');
   }
-  function renderLogo(g,c){
+  function renderLogo(g,c,transparent){
     if(!c)return;
     var template=HIRAGANA_TEMPLATES[c[0]];
     if(!template)return;
@@ -193,7 +200,11 @@ $(function(){
     }
     g.fill();
     g.fillStyle='white'
-    g.globalCompositeOperation = "destination-out";
+    if(transparent){
+      g.globalCompositeOperation = "destination-out";
+    }else{
+      g.globalCompositeOperation = "source-over";
+    }
     renderers.pen(g, new Moji(template).random());
   }
 })
@@ -213,6 +224,7 @@ mode(筆推奨):<select>
 </select>
 &nbsp;&nbsp;&nbsp;
 logo:<input value='ぺ'>
+<label><input type=checkbox>透過</label>
 <span></span>
 <textarea style='width:100%;height:160px;font-size:20px;'>
 ごみばこ
@@ -222,4 +234,4 @@ logo:<input value='ぺ'>
        \(^o^)/ぺんし</textarea>
 <br>
 </div>
-<canvas style='width:100%;'></canvas>
+<canvas style='width:100%;background:url(tile.png)'></canvas>
