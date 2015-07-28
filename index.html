@@ -54,17 +54,16 @@ $(function(){
     if(text!=defaultParams.text)obj.text=text;
     if(transparent!=defaultParams.transparent)obj.transparent=transparent;
     if(logo!=defaultParams.logo)obj.logo=logo;
-    setLocationHashObject(obj);
+    hash = setLocationHashObject(obj);
+    $('a.tweet').attr('href','https://twitter.com/intent/tweet?text='+encodeURIComponent(location.href)).show();
     var width=$('body').width();
     canvas=renderToCanvas(width,mode,text,logo,transparent);
     createLink(canvas);
   }
   function createLink(canvas){
-    $('span').empty();
     $('img, canvas').remove();
     try{
       var url=canvas.toDataURL();
-      $("<a download='tegaki.png'>download</a>").attr('href',url).appendTo('span');
       $('<img>').attr('src',url).appendTo('body');
     }catch(e){
       $('body').append(canvas);
@@ -79,7 +78,30 @@ div{margin: 5px;font-size:20px;}
 div,textarea,input,select,option{
   font-size:20px;
 }
-span{float:right;}
+span{float: right;}
+a.tweet{
+  display:block;
+  padding: 0 5px;
+  margin: 0 5px;
+  background:#eee;
+  border:1px solid silver;
+  border-radius:3px;
+  font-size:18px;
+  height: 28px;
+  line-height: 28px;
+  text-decoration: none;
+  color:black;
+}
+a.tweet:hover{background:#ccc;}
+a.tweet:active{background:#aaa;}
+a.tweet b{
+  background: #0ae;
+  color: white;
+  font-size: 0.8em;
+  margin-right: 2px;
+  border-radius: 10px 4px 8px 6px;
+  padding: 3px;
+}
 textarea{width:100%;height:160px;font-size:24px;}
 img,canvas{background:url(tile.png);width:100%;}
 </style>
@@ -93,6 +115,6 @@ img,canvas{background:url(tile.png);width:100%;}
 &nbsp;&nbsp;&nbsp;
 <nobr>logo:<input id='logo'></nobr>
 <nobr><label><input type=checkbox id='transparent'>透過</label></nobr>
-<span></span>
+<span><a target='tweet' class='tweet' style='display:none'><b>鳥</b>tweet</a></span>
 <textarea style='width:100%;height:160px;font-size:20px;' id='text'></textarea>
 </div>
