@@ -122,7 +122,7 @@ var renderers = {
 }
 
 renderers.brush.load=function(cb){
-  renderers.brushes=[];
+  renderers.brush.brushes=[];
   var loaded=0;
   for(var i=0;i<4;i++){
     var img=new Image()

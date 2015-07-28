@@ -5,16 +5,22 @@
 <script src='template.js'></script>
 <script src='smooth_random.js'></script>
 <script src='renderer.js'></script>
+<script src='hash.js'></script>
 <script>
 
-
+var defaultParams={
+  mode: 'pen',
+  text: "ごみばこ\n けとばしたって\nいいじゃないか！\n みつをだもの\n       \(^o^)/ぺんし",
+  logo: 'ぺ',
+  transparent: false
+}
 $(function(){
-  renderers.brush.brushes=[];
-  for(var i=0;i<4;i++){
-    var img=new Image()
-    img.src='brush/'+i+'.png';
-    renderers.brush.brushes[i]=img;
-  }
+  var params = getLocationHashObject();
+  $('#mode').val(params.mode||defaultParams.mode);
+  $('#text').val(params.text||defaultParams.text);
+  $('#logo').val(params.logo||defaultParams.logo);
+  if(params.transparent)$('#transparent').attr({checked:true});
+  renderers.brush.load(function(){if($('#mode').val()=='brush')renderAll()});
   $('textarea, input').on('input',renderAll)
   $('textarea, input, select').on('change',renderAll)
   window.onresize=renderAll;
@@ -38,13 +44,18 @@ $(function(){
     }
     return lines;
   }
-
   function renderAll(){
     var mode = $('select').val()
     var text = $('textarea').val();
     var transparent = $('input[type=checkbox]').is(':checked');
+    var logo=$('input').val();
+    var obj={};
+    if(mode!=defaultParams.mode)obj.mode=mode;
+    if(text!=defaultParams.text)obj.text=text;
+    if(transparent!=defaultParams.transparent)obj.transparent=transparent;
+    if(logo!=defaultParams.logo)obj.logo=logo;
+    setLocationHashObject(obj);
     var width=$('body').width();
-    var logo=$('input').val()
     canvas=renderToCanvas(width,mode,text,logo,transparent);
     createLink(canvas);
   }
@@ -69,20 +80,15 @@ span{float:right;}
 img,canvas{background:url(tile.png);width:100%;}
 </style>
 <div>
-mode(筆推奨):<select>
+mode(筆推奨):<select id='mode'>
   <option value=round>シンプル</option>
-  <option value=pen selected>ペン</option>
+  <option value=pen>ペン</option>
   <option value=lines>線</option>
   <option value=brush>筆(重いです 文章を決めてから選んでね)</option>
 </select>
 &nbsp;&nbsp;&nbsp;
-logo:<input value='ぺ'>
-<label><input type=checkbox>透過</label>
+logo:<input id='logo'>
+<label><input type=checkbox id='transparent'>透過</label>
 <span></span>
-<textarea style='width:100%;height:160px;font-size:20px;'>
-ごみばこ
- けとばしたって
-いいじゃないか！
- みつをだもの
-       \(^o^)/ぺんし</textarea>
+<textarea style='width:100%;height:160px;font-size:20px;' id='text'></textarea>
 </div>
