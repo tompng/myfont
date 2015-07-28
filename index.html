@@ -75,20 +75,24 @@ $(function(){
 </script>
 <style>
 body{margin:0;}
-div{margin: 5px;}
+div{margin: 5px;font-size:20px;}
+div,textarea,input,select,option{
+  font-size:20px;
+}
 span{float:right;}
+textarea{width:100%;height:160px;font-size:24px;}
 img,canvas{background:url(tile.png);width:100%;}
 </style>
 <div>
-mode(筆推奨):<select id='mode'>
-  <option value=round>シンプル</option>
+<nobr>
+  mode(筆推奨):<select id='mode'>
   <option value=pen>ペン</option>
-  <option value=lines>線</option>
   <option value=brush>筆(重いです 文章を決めてから選んでね)</option>
 </select>
+</nobr>
 &nbsp;&nbsp;&nbsp;
-logo:<input id='logo'>
-<label><input type=checkbox id='transparent'>透過</label>
+<nobr>logo:<input id='logo'></nobr>
+<nobr><label><input type=checkbox id='transparent'>透過</label></nobr>
 <span></span>
 <textarea style='width:100%;height:160px;font-size:20px;' id='text'></textarea>
 </div>
