@@ -21,14 +21,17 @@ var renderers = {
     Moji.toDoubledLines(arr,6).forEach(function(line){
       var weight=new SmoothRandom();
       var prev=null;
+      var t=0;
       line.forEach(function(p){
+        t+=1/line.length;
         var l=0;
         if(prev){
           var dx=p.x-prev.x,dy=p.y-prev.y;
           l=Math.sqrt(dx*dx+dy*dy);
         }
         prev=p;
-        var r=0.05*Math.exp(0.2*weight.next(l*8))
+        var r=0.06*Math.exp(0.2*weight.next(l*8));
+        r*=1-Math.pow(t,4)/4;
         g.beginPath();
         g.arc(p.x,p.y,r,0,2*Math.PI);
         g.fill();
@@ -77,16 +80,20 @@ var renderers = {
       var params=[];for(var i=0;i<4;i++)params[i]=new SmoothRandom();
       var prev=null;
       var randalpha = 0.6+0.8*Math.random();
+      var t=0;
       line.forEach(function(p){
+        t+=1/line.length;
         var l=0;
         if(prev){
           var dx=p.x-prev.x,dy=p.y-prev.y;
           l=Math.sqrt(dx*dx+dy*dy);
         }
         prev=p;
-        r=0.14*Math.exp(0.2*weight.next(l*8))
+        r=0.16*Math.exp(0.2*weight.next(l*8));
+        r*=1-Math.pow(t,4)/4;
         for(var i=0;i<4;i++){
           var alpha=Math.exp(0.5*params[i].next(l*8))
+          alpha*=1-Math.pow(t,4);
           g.globalAlpha=0.08*randalpha*alpha/Math.max(100*l,1)*linelength;
           g.drawImage(renderers.brush.brushes[i],p.x-r/2,p.y-r/2,r,r);
         }
