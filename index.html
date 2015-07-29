@@ -55,7 +55,7 @@ $(function(){
     if(transparent!=defaultParams.transparent)obj.transparent=transparent;
     if(logo!=defaultParams.logo)obj.logo=logo;
     hash = setLocationHashObject(obj);
-    $('a.tweet').attr('href','https://twitter.com/intent/tweet?text='+encodeURIComponent(location.href)).show();
+    $('a.tweet').attr('href','https://twitter.com/intent/tweet?url='+encodeURIComponent(location.href)).show();
     var width=$('body').width();
     canvas=renderToCanvas(width,mode,text,logo,transparent);
     createLink(canvas);
